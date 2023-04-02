@@ -4,23 +4,34 @@ format: html
 editor: visual
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+#### Task 1: Loading libraries and functions, as well as creating initial set of 50 patients
 
 ```{r}
-1 + 1
+library(tidyverse)
+library(data.table) ## For the fread function
+library(lubridate)
+
+source("sepsis_monitor_functions.R")
+
+df <- initializePatients()
 ```
 
-You can add options to executable code like this
+#### Task 2: Upload to Google Drive 
 
 ```{r}
-#| echo: false
-2 * 2
+library(googledrive)
+
+# We have to write the file to disk first, then upload it
+df %>% write_csv("sepsis_report_temp.csv")
+
+# Uploading happens here
+drive_put(media = "sepsis_report_temp.csv",  
+          path = "https://drive.google.com/drive/folders/1JfYn_0kCM1IWGGSwv0VEkZ1MD2pJp9yt",
+          name = "sepsis_report.csv")
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+#### Task 2: Automate the data updating process
+
+```{r}
+
+```
