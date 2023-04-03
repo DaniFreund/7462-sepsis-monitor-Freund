@@ -1,6 +1,6 @@
 on:
   schedule:
-    - cron:  '* * * * *'
+    - cron:  '59 * * * *'
   push:
     branches: main
   workflow_dispatch:
