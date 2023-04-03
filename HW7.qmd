@@ -21,6 +21,9 @@ df <- initializePatients()
 ```{r}
 library(googledrive)
 drive_auth(email = "freun066@umn.edu")
+library(googlesheets4)
+gs4_auth_configure(api_key = "AIzaSyBDUb6SJ5wxW7XFf4hH7DWuiT8qYYGOTok")
+gs4_deauth()
 
 # We have to write the file to disk first, then upload it
 df %>% write_csv("sepsis_report_temp.csv")
