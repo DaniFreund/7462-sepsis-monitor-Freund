@@ -20,7 +20,7 @@ df <- initializePatients()
 
 ```{r}
 library(googledrive)
-drive_auth(freun066@umn.edu)
+drive_auth(email = "freun066@umn.edu")
 
 # We have to write the file to disk first, then upload it
 df %>% write_csv("sepsis_report_temp.csv")
