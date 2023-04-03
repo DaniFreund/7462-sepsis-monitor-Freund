@@ -30,14 +30,9 @@ jobs:
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
             packages:
-               any::knitr
-               any::rmarkdown
-               any::jsonlite
-               any::dplyr
-               any::ggplot2
-               any::readr
+               any::tidyverse
+               any::data.table
                any::lubridate
-               any::forcats
 
       - name: Render document
         uses: quarto-dev/quarto-actions/render@v2
