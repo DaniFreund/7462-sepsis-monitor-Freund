@@ -1,41 +1,148 @@
 ---
-title: "HW7"
-format: html
+title: "HW 7: Exploring Sepsis Data"
+author: "Dani Freund"
 editor: visual
+output: html_document
 ---
 
-#### Task 1: Loading libraries and functions, as well as creating initial set of 50 patients
+```{r, echo=FALSE}
+time<-Sys.time()
+message <- paste("This report was updated at", time, "CDT")
+cat(message)
+```
 
-```{r}
+```{r, include=FALSE}
 library(tidyverse)
 library(data.table) ## For the fread function
 library(lubridate)
+library(tictoc)
+library(dplyr)
+library(purrr)
+library(readr)
+library(ggplot2)
+library(tidyr)
+library(kableExtra)
 
+# Downloading data from external source
 source("sepsis_monitor_functions.R")
-
-df <- initializePatients()
 ```
 
-#### Task 2: Upload to Google Drive 
+```{r, include = FALSE}
+# tic()
+# sep.50.fread <- makeSepsisDataset(n = 50, read_fn = "fread")
+# toc()
+# 
+# tic()
+# sep.100.fread <- makeSepsisDataset(n = 100, read_fn = "fread")
+# toc()
+# 
+# tic()
+# sep.500.fread <- makeSepsisDataset(n = 500, read_fn = "fread")
+# toc()
+# 
+# tic()
+# sep.50.delim <- makeSepsisDataset(n = 50, read_fn = "read_delim")
+# toc()
+# 
+# tic()
+# sep.100.delim <- makeSepsisDataset(n = 100, read_fn = "read_delim")
+# toc()
+# 
+# tic()
+# sep.500.delim <- makeSepsisDataset(n = 500, read_fn = "read_delim")
+# toc()
+```
 
-```{r}
+```{r, include=FALSE}
 library(googledrive)
-drive_auth(email = "freun066@umn.edu")
-library(googlesheets4)
-gs4_auth_configure(api_key = "AIzaSyBDUb6SJ5wxW7XFf4hH7DWuiT8qYYGOTok")
-gs4_deauth()
 
-# We have to write the file to disk first, then upload it
-df %>% write_csv("sepsis_report_temp.csv")
+ df <- makeSepsisDataset()
+ drive_auth(email = "freun066@umn.edu")
 
-# Uploading happens here
-drive_put(media = "sepsis_report_temp.csv",  
-          path = "https://drive.google.com/drive/folders/1JfYn_0kCM1IWGGSwv0VEkZ1MD2pJp9yt",
-          name = "sepsis_report.csv")
+ # # We have to write the file to disk first, then upload it
+ df %>% write_csv("sepsis_data_temp.csv")
+# 
+# # Uploading happens here
+ sepsis_file <- drive_put(media = "sepsis_data_temp.csv", 
+           path = "https://drive.google.com/drive/folders/1JfYn_0kCM1IWGGSwv0VEkZ1MD2pJp9yt",
+           name = "sepsis_data.csv")
+# 
+# # Set the file permissions so anyone can download this file.
+sepsis_file %>% drive_share_anyone()
 ```
 
-#### Task 2: Automate the data updating process
+```{r, include = FALSE}
+## Calling drive_deauth() prevents R from trying to authenticate via a browser
+## This is needed to make the GitHub Action work
+drive_deauth()
+file_link <- "https://drive.google.com/file/d/1l_fs7vo8S_WQsBfKufBdNi5t0ng-Y3kC/view?usp=sharing"
 
-```{r}
+## All data up until now
+new_data <- updateData(file_link)
+
+## Include only most recent data
+most_recent_data <- new_data %>%
+  group_by(PatientID) %>%
+  filter(obsTime == max(obsTime)) 
+```
+
+```{r, echo = FALSE, warning = FALSE}
+table<-if(any(most_recent_data$SepsisLabel == 1)){
+most_recent_data %>% subset(most_recent_data$SepsisLabel == 1) %>% select("Patient ID" = PatientID, "Heart Rate" = HR, "Temperature" = Temp, "Respiratory Rate" = Resp)} else {message("No patients tested positive for sepsis within the last hour")} 
+
+table %>% kable(caption = "Current State of Patients Currently in ICU with Sepsis") %>%
+  kable_styling(full_width = TRUE)
 
 ```
+
+```{r, echo=FALSE, warning = FALSE}
+history <- if(any(new_data$SepsisLabel == 1)){
+new_data %>% subset(new_data$SepsisLabel == 1) %>% select("Patient_ID" = PatientID, "Heart_Rate" = HR, "Temperature" = Temp, "Respiratory_Rate" = Resp, "ICU_Hour"=ICULOS)} else {message("No positive patients in our dataset")}
+
+history %>% ggplot() + geom_line(aes(x=ICU_Hour, y=Heart_Rate, col=Patient_ID)) + labs(x = "Hour in ICU", y = "Heart Rate", colour="Patient ID") + theme_classic() + ggtitle("History of Heart Rate of Patients with Sepsis in ICU")
+
+history %>% ggplot() + geom_line(aes(x=ICU_Hour, y=Temperature, col=Patient_ID)) + labs(x = "Hour in ICU", y = "Temperature", colour="Patient ID") + theme_classic() + ggtitle("History of Temperature of Patients with Sepsis in ICU")
+
+history %>% ggplot() + geom_line(aes(x=ICU_Hour, y=Respiratory_Rate, col=Patient_ID)) + labs(x = "Hour in ICU", y = "Respiratory Rate", colour="Patient ID") + theme_classic() + ggtitle("History of Respiratory Rate of Patients with Sepsis in ICU")
+```
+
+```{r, echo=FALSE, warning = FALSE}
+# time two hours ago
+time <- Sys.time() - 7300
+time <- force_tz(time, tzone = "UTC") + 18000 # Convert to UTC time zone
+
+# creating ranks for times
+new_data <- new_data %>% group_by(PatientID) %>% mutate(rank=dense_rank(desc(obsTime)))
+
+# subsetting data so that it's the last two measurements for each patient
+two.measures <- subset(new_data, new_data$rank == 1 |
+                      new_data$rank == 2) 
+
+# pivoting new and old data to long formate
+df.wide<-two.measures %>% pivot_wider(
+  id_cols = PatientID,
+  names_from = rank,
+  values_from = c(SepsisLabel, ICULOS, HR, Temp, Resp)
+)
+
+# subtracting columns 
+df.wide$HR.diff <- df.wide$HR_1 - df.wide$HR_2
+df.wide$Temp.diff <- df.wide$Temp_1 - df.wide$Temp_2
+df.wide$Resp.diff <- df.wide$Resp_1 - df.wide$Resp_2
+
+
+
+# selecting columns
+df.wide %>% 
+              mutate(HR.diff, color = ifelse(HR.diff > 0, "green","red")) %>% 
+              mutate(Temp.diff, color = ifelse(Temp.diff > 0, "green","red")) %>%               mutate(Resp.diff, color = ifelse(Resp.diff > 0, "green","red")) %>%
+              select(
+              "Patient ID" = PatientID,
+              "Difference in Heart Rate" = HR.diff,
+              "Difference in Temperature" = Temp.diff,
+              "Difference in Respiratory Rate" = Resp.diff) %>% 
+  kable(escape=FALSE, caption = "Change in Patients Physiological Measures over Previous Two Checks") %>% kable_styling(position = "left", full_width = FALSE) %>% column_spec(1, bold = TRUE, border_right = TRUE, color = "black", background = "lightgrey") %>% add_footnote("The time between the recent two checks on patients are not standardized, meaning that measures for some patients occurred closer in time than others.", notation="alphabet")
+
+```
+
+#### 
