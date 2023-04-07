@@ -28,17 +28,17 @@ source("sepsis_monitor_functions.R")
 ```
 
 ```{r, include = FALSE}
-# tic()
-# sep.50.fread <- makeSepsisDataset(n = 50, read_fn = "fread")
-# toc()
+tic()
+sep.50.fread <- makeSepsisDataset(n = 50, read_fn = "fread")
+ toc()
 # 
-# tic()
-# sep.100.fread <- makeSepsisDataset(n = 100, read_fn = "fread")
-# toc()
+tic()
+sep.100.fread <- makeSepsisDataset(n = 100, read_fn = "fread")
+toc()
 # 
-# tic()
-# sep.500.fread <- makeSepsisDataset(n = 500, read_fn = "fread")
-# toc()
+tic()
+sep.500.fread <- makeSepsisDataset(n = 500, read_fn = "fread")
+toc()
 # 
 # tic()
 # sep.50.delim <- makeSepsisDataset(n = 50, read_fn = "read_delim")
@@ -96,8 +96,8 @@ table %>% kable(caption = "Current State of Patients Currently in ICU with Sepsi
 ```
 
 ```{r, echo=FALSE, warning = FALSE}
-history <- if(any(new_data$SepsisLabel == 1)){
-new_data %>% subset(new_data$SepsisLabel == 1) %>% select("Patient_ID" = PatientID, "Heart_Rate" = HR, "Temperature" = Temp, "Respiratory_Rate" = Resp, "ICU_Hour"=ICULOS)} else {message("No positive patients in our dataset")}
+history <- if(any(most_recent_data$SepsisLabel == 1)){
+most_recent_data %>% subset(most_recent_data$SepsisLabel == 1) %>% select("Patient_ID" = PatientID, "Heart_Rate" = HR, "Temperature" = Temp, "Respiratory_Rate" = Resp, "ICU_Hour"=ICULOS)} else {message("No positive patients in our dataset")}
 
 history %>% ggplot() + geom_line(aes(x=ICU_Hour, y=Heart_Rate, col=Patient_ID)) + labs(x = "Hour in ICU", y = "Heart Rate", colour="Patient ID") + theme_classic() + ggtitle("History of Heart Rate of Patients with Sepsis in ICU")
 
@@ -112,7 +112,7 @@ time <- Sys.time() - 7300
 time <- force_tz(time, tzone = "UTC") + 18000 # Convert to UTC time zone
 
 # creating ranks for times
-new_data <- new_data %>% group_by(PatientID) %>% mutate(rank=dense_rank(desc(obsTime)))
+most_recent_data <- most_recent_data %>% group_by(PatientID) %>% mutate(rank=dense_rank(desc(obsTime)))
 
 # subsetting data so that it's the last two measurements for each patient
 two.measures <- subset(new_data, new_data$rank == 1 |

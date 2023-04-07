@@ -1,9 +1,12 @@
+on: [workflow_dispatch]
+
+# Un-comment the following lines (and comment out the first one) to make this a scheduled job
 on:
-  schedule:
-    - cron:  '* * * 1 1'
-  push:
-    branches: main
-  workflow_dispatch:
+schedule:
+- cron:  '0 22 * * *'
+push:
+branches: main
+workflow_dispatch:
 
 name: Render Report
 
@@ -31,15 +34,15 @@ jobs:
         with:
             packages:
                any::tidyverse
-               any::data.table
-               any::lubridate
-               any::tictoc
-               any::dplyr
-               any:purrr
-               any::readr
-               any::ggplot2
-               any::tidyr
-               any::kableExtra
+               library::data.table
+               library::lubridate
+               library::tictoc
+               library::dplyr
+               library::purrr
+               library::readr
+               library::ggplot2
+               library::tidyr
+               library::kableExtra
 
       - name: Render document
         uses: quarto-dev/quarto-actions/render@v2
