@@ -28,17 +28,17 @@ source("sepsis_monitor_functions.R")
 ```
 
 ```{r, include = FALSE}
-tic()
-sep.50.fread <- makeSepsisDataset(n = 50, read_fn = "fread")
- toc()
-# 
-tic()
-sep.100.fread <- makeSepsisDataset(n = 100, read_fn = "fread")
-toc()
-# 
-tic()
-sep.500.fread <- makeSepsisDataset(n = 500, read_fn = "fread")
-toc()
+# tic()
+# sep.50.fread <- makeSepsisDataset(n = 50, read_fn = "fread")
+#  toc()
+# # 
+# tic()
+# sep.100.fread <- makeSepsisDataset(n = 100, read_fn = "fread")
+# toc()
+# # 
+# tic()
+# sep.500.fread <- makeSepsisDataset(n = 500, read_fn = "fread")
+# toc()
 # 
 # tic()
 # sep.50.delim <- makeSepsisDataset(n = 50, read_fn = "read_delim")
@@ -57,7 +57,6 @@ toc()
 library(googledrive)
 
  df <- makeSepsisDataset()
- drive_auth(email = "freun066@umn.edu")
 
  # # We have to write the file to disk first, then upload it
  df %>% write_csv("sepsis_data_temp.csv")
@@ -69,6 +68,8 @@ library(googledrive)
 # 
 # # Set the file permissions so anyone can download this file.
 sepsis_file %>% drive_share_anyone()
+
+min(df$obsTime)
 ```
 
 ```{r, include = FALSE}
