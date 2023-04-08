@@ -55,6 +55,7 @@ source("sepsis_monitor_functions.R")
 
 ```{r, include=FALSE}
 library(googledrive)
+drive_deauth()
 
  df <- makeSepsisDataset()
 
@@ -111,7 +112,7 @@ time <- Sys.time() - 7300
 time <- force_tz(time, tzone = "UTC") + 18000 # Convert to UTC time zone
 
 # creating ranks for times
-most_recent_data <- most_recent_data %>% group_by(PatientID) %>% mutate(rank=dense_rank(desc(obsTime)))
+new_data <- new_data %>% group_by(PatientID) %>% mutate(rank=dense_rank(desc(obsTime)))
 
 # subsetting data so that it's the last two measurements for each patient
 two.measures <- subset(new_data, new_data$rank == 1 |
@@ -144,4 +145,4 @@ df.wide %>%
 
 ```
 
-#### 
+
