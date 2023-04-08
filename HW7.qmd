@@ -62,9 +62,7 @@ library(googledrive)
  df %>% write_csv("sepsis_data_temp.csv")
 # 
 # # Uploading happens here
- sepsis_file <- drive_put(media = "sepsis_data_temp.csv", 
-           path = "https://drive.google.com/drive/folders/1JfYn_0kCM1IWGGSwv0VEkZ1MD2pJp9yt",
-           name = "sepsis_data.csv")
+ sepsis_file <- drive_put(media = "sepsis_data_temp.csv", path = "https://drive.google.com/drive/folders/1JfYn_0kCM1IWGGSwv0VEkZ1MD2pJp9yt", name = "sepsis_data.csv")
 # 
 # # Set the file permissions so anyone can download this file.
 sepsis_file %>% drive_share_anyone()
@@ -75,7 +73,7 @@ min(df$obsTime)
 ```{r, include = FALSE}
 ## Calling drive_deauth() prevents R from trying to authenticate via a browser
 ## This is needed to make the GitHub Action work
-drive_deauth()
+#drive_deauth()
 file_link <- "https://drive.google.com/file/d/1l_fs7vo8S_WQsBfKufBdNi5t0ng-Y3kC/view?usp=sharing"
 
 ## All data up until now
@@ -97,8 +95,8 @@ table %>% kable(caption = "Current State of Patients Currently in ICU with Sepsi
 ```
 
 ```{r, echo=FALSE, warning = FALSE}
-history <- if(any(most_recent_data$SepsisLabel == 1)){
-most_recent_data %>% subset(most_recent_data$SepsisLabel == 1) %>% select("Patient_ID" = PatientID, "Heart_Rate" = HR, "Temperature" = Temp, "Respiratory_Rate" = Resp, "ICU_Hour"=ICULOS)} else {message("No positive patients in our dataset")}
+history <- if(any(new_data$SepsisLabel == 1)){
+new_data %>% subset(new_data$SepsisLabel == 1) %>% select("Patient_ID" = PatientID, "Heart_Rate" = HR, "Temperature" = Temp, "Respiratory_Rate" = Resp, "ICU_Hour"=ICULOS)} else {message("No positive patients in our dataset")}
 
 history %>% ggplot() + geom_line(aes(x=ICU_Hour, y=Heart_Rate, col=Patient_ID)) + labs(x = "Hour in ICU", y = "Heart Rate", colour="Patient ID") + theme_classic() + ggtitle("History of Heart Rate of Patients with Sepsis in ICU")
 
