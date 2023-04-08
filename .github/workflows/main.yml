@@ -43,6 +43,7 @@ jobs:
                any::ggplot2
                any::tidyr
                any::kableExtra
+               any::googledrive
 
       - name: Render document
         uses: quarto-dev/quarto-actions/render@v2
