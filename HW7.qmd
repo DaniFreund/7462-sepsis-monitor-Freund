@@ -54,21 +54,21 @@ source("sepsis_monitor_functions.R")
 ```
 
 ```{r, include=FALSE}
-library(googledrive)
-drive_deauth()
-
- df <- makeSepsisDataset()
-
- # # We have to write the file to disk first, then upload it
- df %>% write_csv("sepsis_data_temp.csv")
+# library(googledrive)
+# #drive_deauth()
 # 
-# # Uploading happens here
- sepsis_file <- drive_put(media = "sepsis_data_temp.csv", path = "https://drive.google.com/drive/folders/1JfYn_0kCM1IWGGSwv0VEkZ1MD2pJp9yt", name = "sepsis_data.csv")
+#  df <- makeSepsisDataset()
 # 
-# # Set the file permissions so anyone can download this file.
-sepsis_file %>% drive_share_anyone()
-
-min(df$obsTime)
+#  # # We have to write the file to disk first, then upload it
+#  df %>% write_csv("sepsis_data_temp.csv")
+# # 
+# # # Uploading happens here
+#  sepsis_file <- drive_put(media = "sepsis_data_temp.csv", path = "https://drive.google.com/drive/folders/1JfYn_0kCM1IWGGSwv0VEkZ1MD2pJp9yt", name = "sepsis_data.csv")
+# # 
+# # # Set the file permissions so anyone can download this file.
+# sepsis_file %>% drive_share_anyone()
+# 
+# min(df$obsTime)
 ```
 
 ```{r, include = FALSE}
