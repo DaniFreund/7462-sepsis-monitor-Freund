@@ -54,7 +54,7 @@ source("sepsis_monitor_functions.R")
 ```
 
 ```{r, include=FALSE}
-# library(googledrive)
+library(googledrive)
 # #drive_deauth()
 # 
 #  df <- makeSepsisDataset()
