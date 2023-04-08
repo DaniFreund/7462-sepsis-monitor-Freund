@@ -74,7 +74,7 @@ library(googledrive)
 ```{r, include = FALSE}
 ## Calling drive_deauth() prevents R from trying to authenticate via a browser
 ## This is needed to make the GitHub Action work
-#drive_deauth()
+drive_deauth()
 file_link <- "https://drive.google.com/file/d/1l_fs7vo8S_WQsBfKufBdNi5t0ng-Y3kC/view?usp=sharing"
 
 ## All data up until now
